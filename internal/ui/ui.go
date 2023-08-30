@@ -1,64 +1,42 @@
 package ui
 
 import (
-	"log"
-	"os"
-
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
 
-func RunUi() {
-	if err := termui.Init(); err != nil {
-		log.Fatalf("failed to initialize termui: %v", err)
-	}
-	defer termui.Close()
-
-	currentDir := "/home/gergon02/"
-
-	list := widgets.NewList()
-	list.Title = "List"
-	list.TextStyle = termui.NewStyle(termui.ColorYellow)
-	list.WrapText = false
-	list.SetRect(0, 0, 25, 8)
-
-	updateFileList(currentDir, list)
-
-	termui.Render(list)
-
-	uiEvents := termui.PollEvents()
-	for {
-		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
-			return
-		case "j", "<Down>":
-			list.ScrollDown()
-		case "k", "<Up>":
-			list.ScrollUp()
-		}
-
-		termui.Render(list)
-	}
+type View struct {
+	Grid    *termui.Grid
+	InfoBar *widgets.Paragraph
 }
 
-func updateFileList(dir string, list *widgets.List) {
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		log.Fatalf("failed to read directory: %v", err)
-	}
+func NewView() *View {
+	var view = View{}
 
-	var rows []string
-	for _, file := range files {
-		if file.IsDir() {
-			rows = append(rows, file.Name()+"/")
-		} else {
-			rows = append(rows, file.Name())
-		}
-	}
+	view.InfoBar = widgets.NewParagraph()
 
-	list.Rows = rows
-	if len(rows) > 0 {
-		list.SelectedRow = 0
-	}
+	return &view
+}
+
+func (v *View) SetLayout() {
+	v.Grid = termui.NewGrid()
+	v.SetSize()
+	v.Grid.Set(
+		termui.NewRow(1.0, v.InfoBar),
+	)
+}
+
+func (v *View) Render() {
+	termui.Render(v.Grid)
+}
+
+func (v *View) SetSize() {
+	termWidth, termHeight := termui.TerminalDimensions()
+	v.Grid.SetRect(0, 0, termWidth, termHeight)
+}
+
+func (v *View) SetInfoBarText(text string) {
+	v.InfoBar.Title = "Current Config"
+	v.InfoBar.Text = text
+	v.Render()
 }
