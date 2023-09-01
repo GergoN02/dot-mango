@@ -1,4 +1,4 @@
-module github.com/gergon02/dot-mango
+module github.com/thegenem0/dot-mango
 
 go 1.21.0
 

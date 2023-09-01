@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -12,6 +13,12 @@ const DotMangoConfigFile = ".config/dot-mango/config.toml"
 type UserConfig struct {
 	Name string `toml:"name"`
 	Path string `toml:"path"`
+}
+
+type UserConfigDir struct {
+	FolderName    string
+	SymlinkTarget string
+	Selected      bool
 }
 
 type AppConfig struct {
@@ -36,12 +43,38 @@ func LoadConfig() (*AppConfig, error) {
 			return nil, err
 		}
 
-		relativePath, err := filepath.Rel(homedir, fullPath)
-		if err != nil {
-			return nil, err
-		}
-		config.UserConfig[i].Path = relativePath
+		config.UserConfig[i].Path = fullPath
 	}
 
 	return &config, nil
+}
+
+func GetConfigNames(c *AppConfig) []string {
+	var configNames []string
+	for _, userConfig := range c.UserConfig {
+		configNames = append(configNames, userConfig.Name)
+	}
+	return configNames
+}
+
+func GetUserConfigDirs(path string) ([]UserConfigDir, error) {
+	var configs []UserConfigDir
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("error reading directory: %v", err)
+	}
+
+	for _, file := range files {
+		folderName := file.Name()
+		symlinkTarget := os.ExpandEnv(fmt.Sprintf("$HOME/%s", folderName))
+		config := UserConfigDir{
+			FolderName:    folderName,
+			SymlinkTarget: symlinkTarget,
+			Selected:      true,
+		}
+		configs = append(configs, config)
+	}
+
+	return configs, nil
 }
