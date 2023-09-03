@@ -1,7 +1,0 @@
-[config_version]
-name = "main"
-path = "/path/to/config/folder"
-
-[config_version]
-name = "backup"
-path = "/path/to/config/backups"

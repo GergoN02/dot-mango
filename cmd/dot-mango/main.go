@@ -1,52 +1,54 @@
 package main
 
 import (
-	"sync"
-	"time"
+	"flag"
+	"os"
+	"path/filepath"
 
-	"github.com/gizak/termui/v3"
-	"github.com/thegenem0/dot-mango/internal/events"
-	"github.com/thegenem0/dot-mango/internal/ui"
-	"github.com/thegenem0/dot-mango/internal/utils"
+	"github.com/thegenem0/dot-mango/pkg/app"
+	"github.com/thegenem0/dot-mango/pkg/cmd"
 )
 
 func main() {
-	if err := termui.Init(); err != nil {
-		panic(err)
+	pathPtr := flag.Bool("path", false, "path to dotfiles")
+	initPtr := flag.Bool("init", false, "initialize a mango repository")
+	generatePtr := flag.Bool("generate", false, "generate folders from config")
+	helpPtr := flag.Bool("help", false, "print help")
+
+	flag.Parse()
+
+	if *generatePtr {
+		cmd.GenerateFoldersFromConfig()
+		return
 	}
-	defer termui.Close()
 
-	appConfig, err := utils.LoadConfig()
-	if err != nil {
-		panic(err)
+	if *helpPtr {
+		flag.PrintDefaults()
+		return
 	}
 
-	uiView := ui.NewView(appConfig)
-	uiView.SetLayout()
-	uiView.Render()
+	if *initPtr {
+		if len(flag.Args()) > 0 {
+			initPath := flag.Arg(0)
+			cmd.InitializeGitRepo(initPath)
+		} else {
+			cmd.InitializeGitRepo(".")
+		}
+		return
+	}
 
-	go events.HandleUserEvents(uiView, appConfig)
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		runEventLoop(uiView, appConfig)
-		wg.Done()
-	}()
-
-	wg.Wait()
-}
-
-func runEventLoop(uiView *ui.View, config *utils.AppConfig) {
-	var tick = time.NewTicker(100 * time.Millisecond)
-	for {
-		select {
-		case <-tick.C:
-			uiView.SetInfoBarText(config.UserConfig[0].Name + " " + config.UserConfig[0].Path)
-			uiView.SetConfigSelectorItems(utils.GetConfigNames(config))
-			uiView.SetAvailableConfigsItems(config.UserConfig[0].Path)
-			uiView.Render()
+	if *pathPtr {
+		if len(flag.Args()) > 0 {
+			path := flag.Arg(0)
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				panic(err)
+			}
+			println("Changing directory to " + filepath.Clean(filepath.Join(homeDir, path)))
+			if err := os.Chdir(filepath.Clean(filepath.Join(homeDir, path))); err != nil {
+				panic(err)
+			}
 		}
 	}
+	app.LaunchUI()
 }

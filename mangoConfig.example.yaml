@@ -1,0 +1,11 @@
+mango_config_path:
+system_config_path:
+  #dotfiles_folders:
+  #- name:
+  #  path:
+  #  target_path:
+  #
+  #overrides:
+  #  - config: all
+  #    dotfile_path:
+  #    override_target:
