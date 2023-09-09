@@ -102,33 +102,3 @@ func GetOsConfigPath(sysConfigPath string) string {
 
 	return configPath
 }
-
-// func modifyAppConfig(configFlePath string, update models.AppConfig) (models.AppConfig, error) {
-// 	var c models.AppConfig
-//
-// 	srcFile, err := os.ReadFile("/home/gergon02/Dev/Personal/dot-mango/mangoConfig.example.yaml")
-// 	if err != nil {
-// 		fmt.Println("Error reading default config:", err)
-// 		return c, err
-// 	}
-//
-// 	err = yaml.Unmarshal(srcFile, &c)
-// 	if err != nil {
-// 		fmt.Println("Error unmarshaling YAML:", err)
-// 		return c, err
-// 	}
-//
-// 	if update.SystemConfigPath != "" {
-// 		c.SystemConfigPath = update.SystemConfigPath
-// 	}
-//
-// 	if update.MangoConfigPath != "" {
-// 		c.MangoConfigPath = update.MangoConfigPath
-// 	}
-//
-// 	if update.MangoConfigs != nil {
-// 		c.MangoConfigs = update.MangoConfigs
-// 	}
-//
-// 	return c, nil
-// }
