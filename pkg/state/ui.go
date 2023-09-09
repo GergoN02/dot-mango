@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/gizak/termui/v3"
-	"github.com/thegenem0/dot-mango/pkg/types"
+	"github.com/thegenem0/dot-mango/pkg/models"
 )
 
 var (
@@ -13,23 +13,23 @@ var (
 )
 
 type UiState struct {
-	ActiveDotfileDirChildren []types.DotfileDirectory
+	ActiveDotfileDirChildren []models.DotfileDirectory
 
 	// UI Management
 	ActivePane  termui.Drawable
 	panes       []termui.Drawable
 	WidgetNames map[string]termui.Drawable
+	Popup       models.Popup
 
 	// Current States or Values
 	highlightedPane     int
-	popupActive         bool
-	selectedMangoConfig types.MangoConfig
+	selectedMangoConfig models.MangoConfig
 }
 
 func GetUiState() *UiState {
 	uiOnce.Do(func() {
 		uiInstance = &UiState{
-			ActiveDotfileDirChildren: []types.DotfileDirectory{},
+			ActiveDotfileDirChildren: []models.DotfileDirectory{},
 			panes:                    []termui.Drawable{},
 			WidgetNames:              map[string]termui.Drawable{},
 			highlightedPane:          0,
@@ -38,19 +38,19 @@ func GetUiState() *UiState {
 	return uiInstance
 }
 
-func (self *UiState) SetSelectedMangoConfig(mangoConfig types.MangoConfig) {
+func (self *UiState) SetSelectedMangoConfig(mangoConfig models.MangoConfig) {
 	self.selectedMangoConfig = mangoConfig
 }
 
-func (self *UiState) GetSelectedMangoConfig() types.MangoConfig {
+func (self *UiState) GetSelectedMangoConfig() models.MangoConfig {
 	return self.selectedMangoConfig
 }
 
-func (self *UiState) SetActiveDotfileDirChildren(dotfileDirChildren []types.DotfileDirectory) {
+func (self *UiState) SetActiveDotfileDirChildren(dotfileDirChildren []models.DotfileDirectory) {
 	self.ActiveDotfileDirChildren = dotfileDirChildren
 }
 
-func (self *UiState) GetActiveDotfileDirChildren() []types.DotfileDirectory {
+func (self *UiState) GetActiveDotfileDirChildren() []models.DotfileDirectory {
 	return self.ActiveDotfileDirChildren
 }
 
@@ -87,11 +87,35 @@ func (self *UiState) GetHighlightedPane() int {
 }
 
 func (self *UiState) SetPopupActive(active bool) {
-	self.popupActive = active
+	self.Popup.IsActive = active
 }
 
 func (self *UiState) GetPopupActive() bool {
-	return self.popupActive
+	return self.Popup.IsActive
+}
+
+func (self *UiState) SetPopupContent(content string) {
+	self.Popup.Content = content
+}
+
+func (self *UiState) GetPopupContent() string {
+	return self.Popup.Content
+}
+
+func (self *UiState) SetPopupType(popupType models.PopupType) {
+	self.Popup.Type = popupType
+}
+
+func (self *UiState) GetPopupType() models.PopupType {
+	return self.Popup.Type
+}
+
+func (self *UiState) SetPopupActions(actions []string) {
+	self.Popup.Actions = actions
+}
+
+func (self *UiState) GetPopupActions() []string {
+	return self.Popup.Actions
 }
 
 func (self *UiState) GetActiveWidgetName() string {

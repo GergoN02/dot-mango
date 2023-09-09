@@ -24,3 +24,21 @@ func GetConfigPathByName(appState *state.AppState, name string) (string, error) 
 	}
 	return "", fmt.Errorf("config with name '%s' not found", name)
 }
+
+func FormatErrors(errors []error) string {
+	var errorString string
+	for _, err := range errors {
+		if err != nil {
+			errorString += fmt.Sprintf("%s\n", err)
+		}
+	}
+	return errorString
+}
+
+func FormatActions(actions []string) string {
+	var actionString string
+	for _, action := range actions {
+		actionString += fmt.Sprintf("(%s)    ", action)
+	}
+	return actionString
+}

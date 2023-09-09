@@ -1,4 +1,13 @@
-package types
+package models
+
+type PopupType int
+
+const (
+	InfoPopup PopupType = iota
+	FileOverwritePopup
+
+	MaxPopupType
+)
 
 type MangoConfig struct {
 	Name      string `yaml:"name"`
@@ -29,4 +38,11 @@ type AppConfig struct {
 	SystemConfigPath string        `yaml:"system_config_path"`
 	MangoConfigs     []MangoConfig `yaml:"dotfiles_folders"`
 	Overrides        []Override    `yaml:"overrides"`
+}
+
+type Popup struct {
+	IsActive bool
+	Content  string
+	Type     PopupType
+	Actions  []string
 }

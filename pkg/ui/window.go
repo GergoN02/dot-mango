@@ -39,12 +39,10 @@ func (self *View) SetLayout() {
 	self.Grid = termui.NewGrid()
 	self.SetSize()
 	self.Grid.Set(
-		termui.NewCol(0.2,
-			termui.NewRow(0.2, self.InfoBar),
-			termui.NewRow(0.8, self.ConfigSelector),
-		),
-		termui.NewCol(0.8,
-			termui.NewRow(1.0, self.DotfileDirs),
+		termui.NewRow(0.1, self.InfoBar),
+		termui.NewRow(0.9,
+			termui.NewCol(0.2, self.ConfigSelector),
+			termui.NewCol(0.8, self.DotfileDirs),
 		),
 	)
 }
@@ -80,4 +78,11 @@ func (self *View) SwitchPane() {
 
 func (self *View) TogglePopup() {
 	self.SetPopupActive(!self.GetPopupActive())
+
+	//Set popup as active pane on toggle
+	if self.GetActiveWidgetName() != "Popup" {
+		self.SetActivePane(self.GetWidgetNames()["Popup"])
+	} else {
+		self.SetActivePane(self.GetWidgetNames()["DotfileDirs"])
+	}
 }

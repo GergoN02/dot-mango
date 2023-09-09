@@ -2,11 +2,12 @@ package state
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
 
-	"github.com/thegenem0/dot-mango/pkg/types"
+	"github.com/thegenem0/dot-mango/pkg/models"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,8 +25,8 @@ type AppState struct {
 
 	MangoConfigPath  string
 	SystemConfigPath string
-	MangoConfigs     []types.MangoConfig
-	Overrides        []types.Override
+	MangoConfigs     []models.MangoConfig
+	Overrides        []models.Override
 }
 
 func GetAppState() *AppState {
@@ -59,25 +60,25 @@ func (self *AppState) GetSystemConfigPath() string {
 	return self.SystemConfigPath
 }
 
-func (self *AppState) SetMangoConfigs(configs []types.MangoConfig) {
+func (self *AppState) SetMangoConfigs(configs []models.MangoConfig) {
 	self.Lock()
 	defer self.Unlock()
 	self.MangoConfigs = configs
 }
 
-func (self *AppState) GetMangoConfigs() []types.MangoConfig {
+func (self *AppState) GetMangoConfigs() []models.MangoConfig {
 	self.RLock()
 	defer self.RUnlock()
 	return self.MangoConfigs
 }
 
-func (self *AppState) SetOverrides(overrides []types.Override) {
+func (self *AppState) SetOverrides(overrides []models.Override) {
 	self.Lock()
 	defer self.Unlock()
 	self.Overrides = overrides
 }
 
-func (self *AppState) GetOverrides() []types.Override {
+func (self *AppState) GetOverrides() []models.Override {
 	self.RLock()
 	defer self.RUnlock()
 	return self.Overrides
@@ -87,7 +88,7 @@ func (self *AppState) LoadConfig() error {
 	self.Lock()
 	defer self.Unlock()
 
-	var config types.AppConfig
+	var config models.AppConfig
 
 	bytes, err := os.ReadFile(filepath.Clean(filepath.Join(self.MangoConfigPath, DotMangoConfigFile)))
 	if err != nil {
@@ -99,12 +100,16 @@ func (self *AppState) LoadConfig() error {
 		return fmt.Errorf("failed to unmarshal yaml: %w", err)
 	}
 
+	if len(config.MangoConfigs) == 0 {
+		log.Panicln("no mango configs found, please add some to the config file")
+	}
+
 	for i, mangoConfig := range config.MangoConfigs {
-		var overrides []types.ConfigBoundOverride
+		var overrides []models.ConfigBoundOverride
 		if config.Overrides != nil {
 			for _, override := range config.Overrides {
 				if override.Name == mangoConfig.Name || override.Name == "all" {
-					overrides = append(mangoConfig.Overrides, types.ConfigBoundOverride{
+					overrides = append(mangoConfig.Overrides, models.ConfigBoundOverride{
 						Path:   override.Dotfile,
 						Target: override.Target,
 					})
@@ -118,8 +123,21 @@ func (self *AppState) LoadConfig() error {
 		config.MangoConfigs[i].Overrides = overrides
 	}
 
-	self.MangoConfigPath = config.MangoConfigPath
-	self.SystemConfigPath = config.SystemConfigPath
+	sysConfigPath, err := os.UserConfigDir()
+	if err != nil {
+		return fmt.Errorf("failed to get user config dir: %w", err)
+	}
+
+	if config.SystemConfigPath != "" {
+		self.SystemConfigPath = config.SystemConfigPath
+	} else {
+		self.SystemConfigPath = sysConfigPath
+	}
+	if config.MangoConfigPath == "" {
+		log.Panicln("mango config path is not set, please set it in the config file")
+	} else {
+		self.MangoConfigPath = config.MangoConfigPath
+	}
 	self.MangoConfigs = config.MangoConfigs
 	self.Overrides = config.Overrides
 

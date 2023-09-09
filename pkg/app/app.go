@@ -41,6 +41,7 @@ func runEventLoop(uiView *ui.View) {
 		select {
 		case <-tick.C:
 			uiView.SetInfoBarText()
+			uiView.SetPopup()
 			uiView.SetConfigSelectorItems()
 			uiView.Render()
 		}

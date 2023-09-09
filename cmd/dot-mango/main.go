@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/thegenem0/dot-mango/pkg/app"
-	"github.com/thegenem0/dot-mango/pkg/cmd"
+	"github.com/thegenem0/dot-mango/pkg/command"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 	flag.Parse()
 
 	if *generatePtr {
-		cmd.GenerateFoldersFromConfig()
+		command.GenerateFoldersFromConfig()
 		return
 	}
 
@@ -30,9 +30,9 @@ func main() {
 	if *initPtr {
 		if len(flag.Args()) > 0 {
 			initPath := flag.Arg(0)
-			cmd.InitializeGitRepo(initPath)
+			command.InitializeGitRepo(initPath)
 		} else {
-			cmd.InitializeGitRepo(".")
+			command.InitializeGitRepo(".")
 		}
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thegenem0/dot-mango/pkg/fileops"
+	"github.com/thegenem0/dot-mango/pkg/models"
 	"github.com/thegenem0/dot-mango/pkg/state"
 )
 
@@ -14,7 +15,19 @@ func (self *View) SetActiveMangoConfig() {
 		self.SetSelectedMangoConfig(mangoConfigs.GetMangoConfigs()[selectedIndex])
 	}
 	configDirs := fileops.GetUserConfigDirs(self.GetSelectedMangoConfig().Path, self.GetSelectedMangoConfig().Overrides, mangoConfigs.GetSystemConfigPath())
-	self.ActiveDotfileDirChildren = configDirs
+	if len(configDirs) > 0 {
+		self.SetActiveDotfileDirChildren(configDirs)
+	} else {
+		// TODO: Add actual logic here, this is dodgy
+		self.SetActiveDotfileDirChildren([]models.DotfileDirectory{
+			{
+				Name:          "No dotfiles found",
+				IsFolder:      false,
+				SymlinkTarget: "",
+				Selected:      false,
+			},
+		})
+	}
 	self.RenderActiveDotfileDirChildren()
 }
 

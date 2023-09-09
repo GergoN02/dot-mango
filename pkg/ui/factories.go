@@ -25,8 +25,8 @@ func createAvailableConfigs() *widgets.List {
 func createPopup() *widgets.Paragraph {
 	popup := widgets.NewParagraph()
 	termWidth, termHeight := termui.TerminalDimensions()
-	popupWidth := termWidth / 3
-	popupHeight := termHeight / 5
+	popupWidth := termWidth / 2
+	popupHeight := termHeight / 4
 	popup.Title = "Popup"
 	popup.TextStyle = termui.NewStyle(termui.ColorYellow)
 	popup.WrapText = false

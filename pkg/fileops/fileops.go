@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/thegenem0/dot-mango/pkg/models"
 	"github.com/thegenem0/dot-mango/pkg/state"
-	"github.com/thegenem0/dot-mango/pkg/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -17,12 +17,12 @@ func InitDefaultMangoConfig(path string) {
 		return
 	}
 
-	config, err := modifyAppConfig(path, types.AppConfig{
+	config := models.AppConfig{
 		MangoConfigPath:  mangoPath,
 		SystemConfigPath: "",
-		MangoConfigs:     []types.MangoConfig{},
-		Overrides:        []types.Override{},
-	})
+		MangoConfigs:     []models.MangoConfig{},
+		Overrides:        []models.Override{},
+	}
 
 	destPath := filepath.Join(path, "mangoConfig.yaml")
 	modifiedConfig, err := yaml.Marshal(config)
@@ -40,8 +40,8 @@ func InitDefaultMangoConfig(path string) {
 
 func GenerateRepoFileStructure(appState *state.AppState) {
 	for _, userConfig := range appState.MangoConfigs {
-		fmt.Printf("Generating folder: %s/%s\n", appState.MangoConfigPath, userConfig.Name)
-		err := os.MkdirAll(filepath.Join(appState.MangoConfigPath, userConfig.Name), 0755)
+		fmt.Printf("Generating folder: %s\n", userConfig.Path)
+		err := os.MkdirAll(userConfig.Path, 0755)
 		if err != nil {
 			fmt.Println("Error creating folder:", err)
 			return
@@ -49,20 +49,8 @@ func GenerateRepoFileStructure(appState *state.AppState) {
 	}
 }
 
-func SymlinkSelectedDotfiles(dirs []types.DotfileDirectory) {
-	for _, dir := range dirs {
-		if dir.Selected {
-			err := os.Symlink(dir.SymlinkTarget, dir.Name)
-			if err != nil {
-				fmt.Println("Error symlinking:", err)
-				return
-			}
-		}
-	}
-}
-
-func GetUserConfigDirs(path string, overrides []types.ConfigBoundOverride, sysConfigPath string) []types.DotfileDirectory {
-	var configs []types.DotfileDirectory
+func GetUserConfigDirs(path string, overrides []models.ConfigBoundOverride, sysConfigPath string) []models.DotfileDirectory {
+	var configs []models.DotfileDirectory
 
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -85,7 +73,7 @@ func GetUserConfigDirs(path string, overrides []types.ConfigBoundOverride, sysCo
 			}
 		}
 
-		config := types.DotfileDirectory{
+		config := models.DotfileDirectory{
 			Name:          folderName,
 			SymlinkTarget: resolvedPath,
 			Selected:      true,
@@ -115,32 +103,32 @@ func GetOsConfigPath(sysConfigPath string) string {
 	return configPath
 }
 
-func modifyAppConfig(configFlePath string, update types.AppConfig) (types.AppConfig, error) {
-	var c types.AppConfig
-
-	srcFile, err := os.ReadFile("/home/gergon02/Dev/Personal/dot-mango/mangoConfig.example.yaml")
-	if err != nil {
-		fmt.Println("Error reading default config:", err)
-		return c, err
-	}
-
-	err = yaml.Unmarshal(srcFile, &c)
-	if err != nil {
-		fmt.Println("Error unmarshaling YAML:", err)
-		return c, err
-	}
-
-	if update.SystemConfigPath != "" {
-		c.SystemConfigPath = update.SystemConfigPath
-	}
-
-	if update.MangoConfigPath != "" {
-		c.MangoConfigPath = update.MangoConfigPath
-	}
-
-	if update.MangoConfigs != nil {
-		c.MangoConfigs = update.MangoConfigs
-	}
-
-	return c, nil
-}
+// func modifyAppConfig(configFlePath string, update models.AppConfig) (models.AppConfig, error) {
+// 	var c models.AppConfig
+//
+// 	srcFile, err := os.ReadFile("/home/gergon02/Dev/Personal/dot-mango/mangoConfig.example.yaml")
+// 	if err != nil {
+// 		fmt.Println("Error reading default config:", err)
+// 		return c, err
+// 	}
+//
+// 	err = yaml.Unmarshal(srcFile, &c)
+// 	if err != nil {
+// 		fmt.Println("Error unmarshaling YAML:", err)
+// 		return c, err
+// 	}
+//
+// 	if update.SystemConfigPath != "" {
+// 		c.SystemConfigPath = update.SystemConfigPath
+// 	}
+//
+// 	if update.MangoConfigPath != "" {
+// 		c.MangoConfigPath = update.MangoConfigPath
+// 	}
+//
+// 	if update.MangoConfigs != nil {
+// 		c.MangoConfigs = update.MangoConfigs
+// 	}
+//
+// 	return c, nil
+// }

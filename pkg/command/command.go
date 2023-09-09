@@ -1,4 +1,4 @@
-package cmd
+package command
 
 import (
 	"fmt"
@@ -19,7 +19,8 @@ func InitializeGitRepo(path string) {
 	}
 
 	if _, err := os.Stat(".git"); err == nil {
-		fmt.Println("Git repository already exists!")
+		fmt.Println("Git repository already exists!\nIf you want to reinitialize, delete the .git folder and run mango init again")
+		fileops.InitDefaultMangoConfig(path)
 		return
 	}
 
@@ -57,8 +58,7 @@ func PrintLoadError() {
 
 	redPrint("Could not find mangoConfig.yaml in current directory \nEnsure you run Mango from your mango git Repository")
 	fmt.Println("If you are not in your mango repository, you can specify the path to your dotfiles repository with the --path flag")
-	fmt.Println("If you do not have a mango repository, you can create one with the --init flag")
-	fmt.Println("\n")
+	fmt.Println("If you do not have a mango repository, you can create one with the --init flag\n\n")
 
 	os.Exit(1)
 }

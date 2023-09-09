@@ -1,10 +1,13 @@
 package events
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/thegenem0/dot-mango/pkg/fileops"
+	"github.com/thegenem0/dot-mango/pkg/models"
 	"github.com/thegenem0/dot-mango/pkg/ui"
 )
 
@@ -21,6 +24,7 @@ const (
 	KeyTab
 	KeyQuit
 	KeyQ
+	KeyS
 	KeyH
 	KeyJ
 	KeyK
@@ -49,7 +53,22 @@ func HandleUserEvents(view *ui.View) {
 			case "<Escape>", "q":
 				view.TogglePopup()
 			case "y", "Y":
+				if view.GetPopupType() == models.FileOverwritePopup {
+					err := fileops.SymlinkSelectedDotfiles(view.GetSelectedMangoConfig().Path, view.GetActiveDotfileDirChildren())
+					view.SetPopupType(models.InfoPopup)
+					if err != nil {
+						view.SetPopupContent(fmt.Sprintf("Error: %s", err))
+					} else {
+						view.SetPopupContent("Success!\n\nPress <Enter> to continue.")
+					}
+
+				}
+			case "n", "N":
 				view.TogglePopup()
+			case "<Enter>":
+				if view.GetPopupType() == models.InfoPopup {
+					view.TogglePopup()
+				}
 			default:
 				break
 			}
@@ -73,6 +92,14 @@ func HandleUserEvents(view *ui.View) {
 			case "a":
 				view.ToggleAllConfigItems()
 			case "p":
+				view.TogglePopup()
+			case "s":
+				if err := fileops.CheckSymlinkPaths(view.GetActiveDotfileDirChildren()); err != nil {
+					view.SetPopupContent("Some files already exist at the symlink locations.\nAre you sure you want to overwrite them?\n\nPress <y> to confirm, <n> to cancel.")
+				} else {
+					view.SetPopupContent("Are you sure you want to symlink these files? (y/n)\n\n")
+				}
+				view.SetPopupType(models.FileOverwritePopup)
 				view.TogglePopup()
 			}
 		}
