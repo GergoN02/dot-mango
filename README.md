@@ -1,4 +1,4 @@
-#Dot-Mango
+# Dot-Mango
 ## A dotfiles version manager, right from within your configs.
 
 ### But why another dots manager???
